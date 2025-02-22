@@ -18,7 +18,7 @@ import os
 
 env  = environ.Env(DEBUG=(bool,False))
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR / '.env'))
 
 
@@ -41,6 +41,7 @@ DJANGO_APPS=[
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
@@ -50,6 +51,10 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'djoser',
     "corsheaders",
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 
 ]
 
@@ -67,6 +72,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 AUTH_USER_MODEL = "authentication.User"
@@ -86,6 +92,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
             ],
         },
     },
@@ -174,7 +181,7 @@ DJOSER = {
     'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
     'TOKEN_MODEL': None,       # To Delete User Must Set it to None
     'SERIALIZERS':{
-        
+
     'user_create': 'apps.authentication.serializers.CustomUserCreateSerializer',
     'user': 'apps.authentication.serializers.CustomUserSerializer',
     'user_delete': 'djoser.serializers.UserDeleteSerializer',
@@ -182,6 +189,33 @@ DJOSER = {
 
 
     }
+
+AUTHENTICATION_BACKENDS = [ 
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+
+]
+
+SITE_ID = 1
+
+SOCIALACCOUNT_PROVIDERS = {
+    "github": {
+        "VERIFIED_EMAIL": True
+    },
+    "google": {
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+    },
+}
+
+# LOGIN_REDIRECT_URL = "/"  # Redirect to homepage or dashboard instead of login page
+# ACCOUNT_LOGOUT_REDIRECT_URL = "/accounts/login/"  # Redirect to login page after logout
+
 
 #LOGGING
 import logging
@@ -224,3 +258,7 @@ logging.config.dictConfig(
         },
     }
 )
+
+
+
+
