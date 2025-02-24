@@ -10,7 +10,7 @@ This is a boilerplate project for authentication in Django, integrating **Djoser
   - JWT Authentication
   - Prebuilt authentication endpoints from Djoser
 - **Django-Allauth Integration**
-  - Social Authentication (Google)
+  - Social Authentication (Google, Facebook, etc.)
 - **API-based Authentication** (for frontend apps)
 - **Docker Support** for easy deployment
 
@@ -57,7 +57,7 @@ Ensure you have the following installed on your system:
 
 4. **Set up environment variables:**
 
-   - Update `.env` according to your credentials.
+   - Rename `.env.example` to `.env` and update the values accordingly.
 
 5. **Apply migrations:**
 
@@ -97,18 +97,63 @@ Ensure you have the following installed on your system:
 
 ### Djoser (JWT Authentication)
 
-- `POST /auth/jwt/create/` → Obtain JWT token
-- `POST /auth/jwt/refresh/` → Refresh JWT token
-- `POST /auth/jwt/verify/` → Verify JWT token
-- `POST /auth/users/` → Register a new user
-- `POST /auth/users/activation/` → Activate a user
-- `POST /auth/users/resend_activation/` → Resend activation email
+- `POST /auth/users/` → Registration
+- `POST /auth/users/activation/` → Activate user
+- `POST /auth/jwt/create/` → Login (obtain JWT token)
+- `POST /auth/jwt/refresh/` → New access token
+- `POST /auth/users/set_password/` → Change password
 - `POST /auth/users/reset_password/` → Reset password
+- `POST /auth/users/reset_password_confirm/` → Reset password confirmation
+- `DELETE /auth/users/me/` → Delete user
 
 ### Django-Allauth (Google Authentication)
 
 - `GET /accounts/login/` → Login a user
-- `POST /accounts/logout/` → Logout a user
+- `GET /accounts/logout/` → Logout a user
+
+## Changing Site in Django Admin
+
+To configure the correct site for social authentication:
+
+1. **Login to Django Admin:**
+   ```bash
+   http://localhost:8000/admin/
+   ```
+   Use your superuser credentials to log in.
+
+2. **Navigate to "Sites" Model:**
+   - Find **Sites** under the "django.contrib.sites" app.
+   - Change the existing site (usually `example.com`) to your domain (e.g., `localhost:8000`).
+
+## Adding Google API Credentials to Social Account Table
+
+To configure Google login with Django-Allauth:
+
+1. **Create a Google OAuth App:**
+   - Go to [Google Developer Console](https://console.cloud.google.com/).
+   - Create a new project.
+   - Navigate to **Credentials** and create an **OAuth 2.0 Client ID**.
+   - Set the **Authorized redirect URIs** to:
+     ```
+     http://localhost:8000/accounts/google/login/callback/
+     ```
+
+2. **Update Django Admin Social Applications:**
+   - Go to Django Admin (`http://localhost:8000/admin/`).
+   - Find **Social Applications** under "django-allauth".
+   - Add a new social application:
+     - **Provider:** Google
+     - **Name:** Google Login
+     - **Client ID:** (Copy from Google Developer Console)
+     - **Secret Key:** (Copy from Google Developer Console)
+     - **Sites:** Select your site (e.g., `localhost:8000`).
+
+3. **Save and Restart Server:**
+   ```bash
+   python manage.py runserver
+   ```
+
+Now, users can log in using Google OAuth authentication.
 
 ## Contributing
 
@@ -117,6 +162,7 @@ Feel free to contribute to this project! Fork the repository and submit a pull r
 ## License
 
 This project is open-source and available under the **MIT License**.
+
 
 
 
