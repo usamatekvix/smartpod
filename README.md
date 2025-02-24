@@ -10,7 +10,7 @@ This is a boilerplate project for authentication in Django, integrating **Djoser
   - JWT Authentication
   - Prebuilt authentication endpoints from Djoser
 - **Django-Allauth Integration**
-  - Social Authentication (Google, Facebook, etc.)
+  - Social Authentication (Google)
 - **API-based Authentication** (for frontend apps)
 - **Docker Support** for easy deployment
 
