@@ -1,23 +1,46 @@
 import os
-import openai
 import ffmpeg
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-from django.http import JsonResponse
+import whisper
+from django.conf import settings
 
 
-def video_processing(video_file):
-    # Save video to temporary location
-    video_path = default_storage.save(video_file.name, ContentFile(video_file.read()))
-    video_full_path = default_storage.path(video_path)
+model = whisper.load_model("base")
+FFMPEG_PATH = r"D:\software_installation\ffmpeg\bin\ffmpeg.exe"
 
-    # Convert video to audio
-    audio_path = video_full_path.rsplit(".", 1)[0] + ".mp3"
-    ffmpeg.input(video_full_path).output(audio_path).run(overwrite_output=True)
+def convert_video_to_text(video_path):
+    # Extract video filename without extension
+    video_filename = os.path.basename(video_path)  # Get "video.mp4"
+    audio_filename = os.path.splitext(video_filename)[0] + ".mp3"  # Change to "video.mp3"
 
-    # Cleanup: Optionally remove video file after conversion
-    os.remove(video_full_path)
+    # Construct audio path in "media/audio"
+    audio_path = os.path.join(settings.MEDIA_ROOT, "audios", audio_filename)
 
-    # Return success response with audio path
-    return JsonResponse({"message": "Video converted to audio successfully", "audio_path": audio_path})
+    # Ensure the 'audio' directory exists
+    os.makedirs(os.path.dirname(audio_path), exist_ok=True)
+
+    try:
+        # Convert video to audio using FFmpeg
+        ffmpeg.input(video_path).output(audio_path, format="mp3", acodec="libmp3lame").run(cmd=FFMPEG_PATH, overwrite_output=True)
+        print(f"Audio extracted: {audio_path}")
+
+        # Check if audio file was created
+        if not os.path.exists(audio_path):
+            print(f"Audio file not found: {audio_path}")
+            return None
+        
+        # Transcribe the extracted audio
+        transcript = transcribe_audio(audio_path)
+        return transcript
+    except ffmpeg.Error as e:
+        print(f" FFmpeg Error: {e}")
+        return None
+
+def transcribe_audio(audio_path):  
+    print(f"Transcribing: {audio_path}")  
+    try:
+        result = model.transcribe(audio_path)
+        transcript = result["text"]
+        return transcript
+    except Exception as e:
+        print(f"transcribe_audio error {e}")
 

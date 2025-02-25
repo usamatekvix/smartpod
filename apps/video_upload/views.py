@@ -1,26 +1,32 @@
-import os
-from django.conf import settings
-from django.http import JsonResponse
 from rest_framework.views import APIView
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.response import Response
+from django.core.files.storage import default_storage
+from django.conf import settings
+import os
+
+from .processing import convert_video_to_text
 
 class VideoUploadView(APIView):
-    parser_classes = (MultiPartParser, FormParser)  # Allow file uploads
+    def post(self, request):
+        video_file = request.FILES.get("videoFile")
+        category = request.data.get("categoryName", "Unknown")
 
-    def post(self, request, *args, **kwargs):
-        video_file = request.FILES.get("videoFile")  # Get the uploaded file
         if not video_file:
-            return JsonResponse({"error": "No video file provided"}, status=400)
+            return Response({"error": "No video file provided"}, status=400)
 
-        # Define local file path
+        # Save video locally
         video_path = os.path.join(settings.MEDIA_ROOT, "videos", video_file.name)
-
-        # Ensure directory exists
         os.makedirs(os.path.dirname(video_path), exist_ok=True)
-
-        # Save file locally
-        with open(video_path, "wb+") as destination:
+        with open(video_path, "wb") as f:
             for chunk in video_file.chunks():
-                destination.write(chunk)
+                f.write(chunk)
 
-        return JsonResponse({"message": "Video saved successfully", "video_path": video_path}, status=201)
+
+        transcript = convert_video_to_text(video_path)
+
+        return Response({
+            "message": "Video processed successfully",
+            "category": category,
+            "video_path": video_path,
+            "transcript": transcript
+        })
