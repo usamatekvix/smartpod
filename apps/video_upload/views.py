@@ -1,10 +1,14 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
 from django.core.files.storage import default_storage
 from django.conf import settings
 import os
 
 from .processing import convert_video_to_text
+from .models import Transcript
+from .serializers import TranscriptSerializer
+
 
 class VideoUploadView(APIView):
     def post(self, request):
@@ -23,11 +27,13 @@ class VideoUploadView(APIView):
 
 
         transcript = convert_video_to_text(video_path)
+        transcript_instance = Transcript.objects.create(
+            category=category,
+            video_name=video_file.name,
+            transcription=transcript
+        )
+        serializer = TranscriptSerializer(transcript_instance)
 
-        return Response({
-            "id": 1,
-            "message": "Video processed successfully",
-            "category": category,
-            "video_path": video_path,
-            "transcript": transcript
-        })
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
