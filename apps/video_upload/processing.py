@@ -8,7 +8,7 @@ from django.conf import settings
 
 
 FFMPEG_PATH = r"D:\software_installation\ffmpeg\bin\ffmpeg.exe"
-client = OpenAI(api_key=settings.SETTINGS_ENV("OPENAI_API_KEY"))
+model = whisper.load_model("base")
 
 def convert_video_to_text(video_path):
     # Extract video filename without extension
@@ -42,16 +42,8 @@ def convert_video_to_text(video_path):
 def transcribe_audio(audio_path):  
     print(f"Transcribing: {audio_path}")  
     try:
-        with open(audio_path, "rb") as audio_file:
-            result = client.audio.transcriptions.create(
-                model="whisper-1",
-                file=audio_file
-            )
-        
-        transcript = result.text.strip()
+        result = model.transcribe(audio_path)
+        transcript = result["text"]
         return transcript
-
     except Exception as e:
         print(f"transcribe_audio error {e}")
-        return None
-

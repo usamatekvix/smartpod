@@ -25,6 +25,7 @@ class VideoUploadView(APIView):
         transcript = convert_video_to_text(video_path)
 
         return Response({
+            "id": 1,
             "message": "Video processed successfully",
             "category": category,
             "video_path": video_path,
