@@ -4,4 +4,4 @@ from .models import Transcript
 class TranscriptSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transcript
-        fields = ['id','category', 'transcription']
+        fields = ['id','categoryName', 'transcription']
