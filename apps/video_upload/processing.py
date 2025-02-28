@@ -1,14 +1,16 @@
 import os
 import ffmpeg
-import whisper
+from faster_whisper import WhisperModel
 from django.conf import settings
 import os
-from openai import OpenAI
 from django.conf import settings 
+import logging
 
+
+logger = logging.getLogger(__name__)
 
 FFMPEG_PATH = r"D:\software_installation\ffmpeg\bin\ffmpeg.exe"
-model = whisper.load_model("base")
+model = WhisperModel("small", device="cpu")
 
 def convert_video_to_text(video_path):
     
@@ -24,27 +26,36 @@ def convert_video_to_text(video_path):
 
     try:
         # Convert video to audio using FFmpeg
-        ffmpeg.input(video_path).output(audio_path, format="mp3", acodec="libmp3lame").run(cmd=FFMPEG_PATH, overwrite_output=True)
-        print(f"Audio extracted: {audio_path}")
+
+        ffmpeg.input(video_path).output(
+            audio_path, 
+            format="wav",         
+            acodec="pcm_s16le",   
+            ar="16000",           
+            ac="1"                
+        ).run(cmd=FFMPEG_PATH, overwrite_output=True)
+
+        logging.info(f"Audio extracted: {audio_path}")
 
         # Check if audio file was created
         if not os.path.exists(audio_path):
-            print(f"Audio file not found: {audio_path}")
+            logging.info(f"Audio file not found: {audio_path}")
             return None
         
         # Transcribe the extracted audio
         transcript = transcribe_audio(audio_path)
         return transcript
     except ffmpeg.Error as e:
-        print(f" FFmpeg Error: {e}")
+        logging.error(f" FFmpeg Error: {e}")
         return None
 
 
-def transcribe_audio(audio_path):  
-    print(f"Transcribing: {audio_path}")  
+def transcribe_audio(audio_path):
+    logging.info(f"Transcribing: {audio_path}")  
     try:
-        result = model.transcribe(audio_path)
-        transcript = result["text"]
+        segments, _ = model.transcribe(audio_path)
+        transcript = " ".join(segment.text for segment in segments)
         return transcript
     except Exception as e:
-        print(f"transcribe_audio error {e}")
+        logging.error(f"transcribe_audio error {e}")
+        return None  # Return None in case of an error
