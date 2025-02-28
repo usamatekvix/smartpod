@@ -4,4 +4,4 @@ djangorestframework
 django-environ
 ffmpeg-python
 psycopg2
-faster-whisper
+openai-whisper

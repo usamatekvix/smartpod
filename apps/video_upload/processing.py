@@ -1,6 +1,7 @@
 import os
 import ffmpeg
-from faster_whisper import WhisperModel
+import whisper
+
 from django.conf import settings
 import os
 from django.conf import settings 
@@ -10,7 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 FFMPEG_PATH = r"D:\software_installation\ffmpeg\bin\ffmpeg.exe"
-model = WhisperModel("small", device="cpu")
+model = whisper.load_model("base")
 
 def convert_video_to_text(video_path):
     
@@ -51,11 +52,10 @@ def convert_video_to_text(video_path):
 
 
 def transcribe_audio(audio_path):
-    logging.info(f"Transcribing: {audio_path}")  
+    print(f"Transcribing: {audio_path}")
     try:
-        segments, _ = model.transcribe(audio_path)
-        transcript = " ".join(segment.text for segment in segments)
+        result = model.transcribe(audio_path)
+        transcript = result["text"]
         return transcript
     except Exception as e:
         logging.error(f"transcribe_audio error {e}")
-        return None  # Return None in case of an error
