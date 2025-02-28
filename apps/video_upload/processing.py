@@ -11,6 +11,7 @@ FFMPEG_PATH = r"D:\software_installation\ffmpeg\bin\ffmpeg.exe"
 model = whisper.load_model("base")
 
 def convert_video_to_text(video_path):
+    
     # Extract video filename without extension
     video_filename = os.path.basename(video_path)  # Get "video.mp4"
     audio_filename = os.path.splitext(video_filename)[0] + ".mp3"  # Change to "video.mp3"

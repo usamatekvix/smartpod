@@ -161,6 +161,11 @@ import logging.config
 
 from django.utils.log import DEFAULT_LOGGING
 
+LOG_DIR = os.path.join(os.path.dirname(__file__), "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+
+LOG_FILE_PATH = os.path.join(LOG_DIR, "main.log")
+
 logger = logging.getLogger(__name__)
 
 LOG_LEVEL = "INFO"
@@ -185,13 +190,13 @@ logging.config.dictConfig(
                 "level": "INFO",
                 "class": "logging.FileHandler",
                 "formatter": "file",
-                "filename": "logs/main.log",
+                "filename": LOG_FILE_PATH,
             },
             "django.server": DEFAULT_LOGGING["handlers"]["django.server"],
         },
         "loggers": {
             "": {"level": "INFO", "handlers": ["console", "file"], "propagate": False},
-            "apps": {"level": "INFO", "handlers": ["console"], "propagate": False},
+            "apps": {"level": "INFO", "handlers": ["console", "file"], "propagate": False},
             "django.server": DEFAULT_LOGGING["loggers"]["django.server"],
         },
     }
