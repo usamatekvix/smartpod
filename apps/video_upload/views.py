@@ -16,11 +16,12 @@ logger = logging.getLogger(__name__)
 
 class VideoUploadView(APIView):
     def post(self, request):
-        video_file = request.FILES.get("videoFile")
         categoryName = request.data.get("categoryName", "Unknown")
+        video_file = request.FILES.get("videoFile")
+        video_url = request.data.get("url")
 
-        if not video_file:
-            return Response({"error": "No video file provided"}, status=status.HTTP_400_BAD_REQUEST)
+        if not video_file and not video_url:
+            return Response({"error": "No video file or URL  provided"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             # Save video locally
@@ -57,7 +58,7 @@ class VideoUpdateView(APIView):
                 return Response({"error": "Transcript not found"}, status=status.HTTP_404_NOT_FOUND)
 
             video_file = request.FILES.get("videoFile")
-            categoryName = request.data.get("categoryName", transcript_instance.categoryName)  # Keep existing if not provided
+            categoryName = request.data.get("categoryName", transcript_instance.categoryName)
 
             if not video_file:
                 return Response({"error": "No video file provided"}, status=status.HTTP_400_BAD_REQUEST)
