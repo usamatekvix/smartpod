@@ -10,7 +10,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-FFMPEG_PATH = r"D:\software_installation\ffmpeg\bin\ffmpeg.exe"
+FFMPEG_PATH = "ffmpeg"
 model = whisper.load_model("base")
 
 def convert_video_to_text(video_path):
