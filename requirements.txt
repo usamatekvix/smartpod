@@ -5,3 +5,9 @@ django-environ
 ffmpeg-python
 psycopg2
 openai-whisper
+djangorestframework
+djoser
+django-cors-headers
+psycopg2-binary
+django-environ
+django-allauth[socialaccount]
