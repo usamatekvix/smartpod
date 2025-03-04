@@ -11,8 +11,8 @@ from functools import partial
 logger = logging.getLogger(__name__)
 
 # Paths for FFmpeg/FFprobe
-FFMPEG_PATH = r"D:\software_installation\ffmpeg\bin\ffmpeg.exe"
-FFPROBE_PATH = r"D:\software_installation\ffmpeg\bin\ffprobe.exe"
+FFMPEG_PATH = "ffmpeg"
+FFPROBE_PATH = "ffprobe"
 
 # Determine device (GPU if available, else CPU)
 device = "cuda" if torch.cuda.is_available() else "cpu"
