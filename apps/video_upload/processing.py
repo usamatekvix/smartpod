@@ -1,61 +1,89 @@
-import os
-import ffmpeg
-import whisper
-
-from django.conf import settings
-import os
-from django.conf import settings 
 import logging
+import subprocess
+import numpy as np
+import torch
+import whisper
+from multiprocessing import cpu_count
+from concurrent.futures import ProcessPoolExecutor
 
-
+# Set up logging
 logger = logging.getLogger(__name__)
 
-FFMPEG_PATH = "ffmpeg"
+# Paths
+FFMPEG_PATH = r"D:\software_installation\ffmpeg\bin\ffmpeg.exe"
+FFPROBE_PATH = r"D:\software_installation\ffmpeg\bin\ffprobe.exe"
+
+# Load Whisper model
 model = whisper.load_model("base")
 
-def convert_video_to_text(video_path):
-    
-    # Extract video filename without extension
-    video_filename = os.path.basename(video_path)  # Get "video.mp4"
-    audio_filename = os.path.splitext(video_filename)[0] + ".mp3"  # Change to "video.mp3"
 
-    # Construct audio path in "media/audio"
-    audio_path = os.path.join(settings.MEDIA_ROOT, "audios", audio_filename)
+def convert_video_to_text(video_path, chunk_length=150):
+    """Processes video in smaller chunks and transcribes faster."""
+    total_duration = get_video_duration(video_path)
+    if total_duration is None:
+        return "Transcription Failed"
 
-    # Ensure the 'audio' directory exists
-    os.makedirs(os.path.dirname(audio_path), exist_ok=True)
+    chunk_starts = list(range(0, total_duration, chunk_length))
+    num_processes = min(cpu_count(), len(chunk_starts)) 
+
+    with ProcessPoolExecutor(max_workers=num_processes) as executor:
+        results = list(executor.map(process_chunk, [(video_path, start, chunk_length) for start in chunk_starts]))
+
+    transcript = " ".join([r for r in results if isinstance(r, str)]).strip()
+    return transcript if transcript else "Transcription Failed"
+
+
+def process_chunk(args):
+    """Extracts a chunk of video in memory and transcribes it."""
+    video_path, start_time, chunk_length = args
+    num_threads = str(cpu_count())  
+
+    command = [
+        FFMPEG_PATH, "-i", video_path,
+        "-vn", "-sn", "-dn",
+        "-f", "wav", "-acodec", "pcm_s16le",
+        "-ar", "16000", "-ac", "1",
+        "-t", str(chunk_length), "-ss", str(start_time),
+        "-threads", num_threads,
+        "pipe:1"
+    ]
 
     try:
-        # Convert video to audio using FFmpeg
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        audio_data, _ = process.communicate()
 
-        ffmpeg.input(video_path).output(
-            audio_path, 
-            format="wav",         
-            acodec="pcm_s16le",   
-            ar="16000",           
-            ac="1"                
-        ).run(cmd=FFMPEG_PATH, overwrite_output=True)
+        if not audio_data:
+            return ""
 
-        logging.info(f"Audio extracted: {audio_path}")
+        # Convert raw audio bytes to a NumPy array
+        audio_np = np.frombuffer(audio_data, dtype=np.int16).astype(np.float32) / 32768.0
 
-        # Check if audio file was created
-        if not os.path.exists(audio_path):
-            logging.info(f"Audio file not found: {audio_path}")
-            return None
-        
-        # Transcribe the extracted audio
-        transcript = transcribe_audio(audio_path)
-        return transcript
-    except ffmpeg.Error as e:
-        logging.error(f" FFmpeg Error: {e}")
-        return None
+        # Convert to PyTorch tensor
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        audio_tensor = torch.tensor(audio_np).to(device)
 
+        # Transcribe audio
+        result = model.transcribe(audio_tensor)
+        return result["text"]
 
-def transcribe_audio(audio_path):
-    print(f"Transcribing: {audio_path}")
-    try:
-        result = model.transcribe(audio_path)
-        transcript = result["text"]
-        return transcript
     except Exception as e:
-        logging.error(f"transcribe_audio error {e}")
+        logger.error(f"Error processing chunk {start_time}s: {e}")
+        return ""
+
+
+def get_video_duration(video_path):
+    """Retrieves the duration of the video using FFprobe."""
+    command = [
+        FFPROBE_PATH, "-i", video_path,
+        "-show_entries", "format=duration",
+        "-v", "quiet", "-of", "csv=p=0"
+    ]
+
+    try:
+        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        duration_str = result.stdout.strip()
+        return int(float(duration_str)) if duration_str else None
+
+    except Exception as e:
+        logger.error(f"Error getting video duration: {e}")
+        return None

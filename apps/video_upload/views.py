@@ -1,5 +1,4 @@
 import logging
-import os
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -8,7 +7,7 @@ from django.conf import settings
 from .models import Transcript
 from .serializers import TranscriptSerializer
 from .processing import convert_video_to_text
-from .utils import save_uploaded_file, delete_files
+from .utils import save_uploaded_file, delete_file
 
 
 logger = logging.getLogger(__name__)
@@ -46,10 +45,8 @@ class VideoUploadView(APIView):
             return Response({"error": "An error occurred while processing the video"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         finally:
-            # Delete video and corresponding audio file
-            audio_path = os.path.join(
-                settings.MEDIA_ROOT, "audios", os.path.splitext(video_file.name)[0] + ".mp3")
-            delete_files([video_path, audio_path])
+            # Delete video
+            delete_file(video_path)
 
 
 class VideoUpdateView(APIView):
@@ -61,8 +58,7 @@ class VideoUpdateView(APIView):
             return Response({"error": "Transcript not found"}, status=status.HTTP_404_NOT_FOUND)
 
         video_file = request.FILES.get("videoFile")
-        categoryName = request.data.get(
-            "categoryName", transcript_instance.categoryName)
+        categoryName = request.data.get("categoryName", transcript_instance.categoryName)
         video_url = request.data.get("url", transcript_instance.video_url)
 
         if not video_file:
@@ -95,6 +91,4 @@ class VideoUpdateView(APIView):
             return Response({"error": "An error occurred while updating the video"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         finally:
-            # Delete the new video and audio files after processing
-            audio_path = os.path.join(settings.MEDIA_ROOT, "audios", os.path.splitext(video_file.name)[0] + ".mp3")
-            delete_files([video_path, audio_path])
+            delete_file(video_path)
