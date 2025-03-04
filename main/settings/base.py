@@ -19,6 +19,7 @@ CSRF_TRUSTED_ORIGINS = ['http://192.168.1.4:8000','http://192.168.1.4:3000','htt
 DJANGO_APPS=[
     'django.contrib.admin',
     'django.contrib.auth',
+    'django.contrib.sites',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -33,6 +34,7 @@ LOCAL_APPS=[
 THIRD_PARTY_APPS = [
     'rest_framework',
     'djoser',
+    "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     'allauth',
     'allauth.account',
@@ -151,22 +153,26 @@ REST_FRAMEWORK = {
 # JWT Settings
 SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
     "UPDATE_LAST_LOGIN": True,
+    "BLACKLIST_AFTER_ROTATION": True
+
 }
 
 #DJOSER CONFIGURATION
 DJOSER = {
     'LOGIN_FIELD': 'email',
     'USER_CREATE_PASSWORD_RETYPE':True,
+    "USER_ACTIVATION": False,
     'ACTIVATION_URL':'/activate/{uid}/{token}',
-    'SEND_ACTIVATION_EMAIL':True,
-    'SEND_CONFIRMATION_EMAIL':True,
-    'PASSWORD_CHANGED_EMAIL_CONFIRMATION':True,
+    'SEND_ACTIVATION_EMAIL':False,
+    'SEND_CONFIRMATION_EMAIL':False,
+    'PASSWORD_CHANGED_EMAIL_CONFIRMATION':False,
     'PASSWORD_RESET_CONFIRM_URL': 'password-reset/{uid}/{token}',
-    'SET_PASSWORD_RETYPE': True,
-    'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
+    'SET_PASSWORD_RETYPE': False,
+    'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': False,
     'TOKEN_MODEL': None,       # To Delete User Must Set it to None
     'SERIALIZERS':{
 
