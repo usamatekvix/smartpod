@@ -12,8 +12,8 @@ SETTINGS_ENV = env
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.4','172.21.32.1','localhost','127.0.0.1','*']
-CSRF_TRUSTED_ORIGINS = ['http://192.168.1.4:8000','http://192.168.1.4:3000','http://192.168.1.4:3001','http://localhost:3001', 'http://localhost:3000','http://192.168.1.5:8000']
+ALLOWED_HOSTS = ['192.168.1.3','192.168.1.4','172.21.32.1','localhost','127.0.0.1','*']
+CSRF_TRUSTED_ORIGINS = ['http://192.168.1.4:8000','http://192.168.1.4:3000','http://192.168.1.4:3001','http://localhost:3001', 'http://localhost:3000','http://192.168.1.5:8000','http://192.168.1.3:3000']
 
 # Application definition
 DJANGO_APPS=[
@@ -134,6 +134,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     'http://192.168.1.4:3000',  
+    'http://192.168.1.3:3000',  
     'http://192.168.1.4:3001',
     'http://localhost:3001',
     'http://192.168.1.5:8000',  
@@ -179,6 +180,7 @@ DJOSER = {
     'user_create': 'apps.authentication.serializers.CustomUserCreateSerializer',
     'user': 'apps.authentication.serializers.CustomUserSerializer',
     'user_delete': 'djoser.serializers.UserDeleteSerializer',
+    "token_obtain_pair": "authentication.serializers.CustomTokenObtainPairSerializer",
 }
 
 

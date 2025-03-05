@@ -1,29 +1,30 @@
-# Use a lightweight base image
+# Use a stable Python version
 FROM python:3.11-slim
 
-# Set environment variables to avoid interactive prompts
-ENV DEBIAN_FRONTEND=noninteractive 
+# Set the working directory
+WORKDIR /app
 
-# Fix APT-related issues & install ffmpeg
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends ffmpeg && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+# Install system dependencies (including git)
+RUN apt-get update && apt-get install -y git
 
-# Set work directory
-WORKDIR /smartpod
+# Copy the requirements file first to leverage Docker caching
+COPY requirements.txt .
 
-# Copy only requirements first (to use caching)
-COPY requirements.txt . 
+# Upgrade pip, setuptools, and wheel
+RUN pip install --upgrade pip setuptools wheel
 
-# Install dependencies without cache
+# Install numpy separately to avoid issues
+RUN pip install numpy==1.24.3
+
+# Install Whisper from GitHub (fixes versioning issues)
+RUN pip install --no-cache-dir git+https://github.com/openai/whisper.git
+
+# Install remaining dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the project files
+# Copy the rest of the application files
 COPY . .
 
-# Expose port
-EXPOSE 8000
+# Run the application
+CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
 
-# Start Django server
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

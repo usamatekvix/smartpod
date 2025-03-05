@@ -4,6 +4,8 @@ from django.contrib.auth.models import AbstractBaseUser,PermissionsMixin
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from phonenumber_field.modelfields import PhoneNumberField
+
 
 from .managers import CustomUserManager
 
@@ -14,12 +16,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(verbose_name=_("First Name"), max_length=50, blank=True, null=True) 
     last_name = models.CharField(verbose_name=_("Last Name"), max_length=50, blank=True, null=True)   
     email = models.EmailField(verbose_name=_("Email"), unique=True)
+    phone_number = models.CharField(verbose_name=_("Phone Number"), unique=True, null=True, blank=True) 
     date_joined = models.DateTimeField(default=timezone.now)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ["username"]
 
     objects = CustomUserManager()
 
