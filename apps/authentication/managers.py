@@ -3,15 +3,12 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+
 class CustomUserManager(BaseUserManager):
-    def create_user(self, username, first_name, last_name, email, password=None, **extra_fields):
+    def create_user(self, username, email, password=None, first_name="", last_name="", **extra_fields):
         """Creates and returns a regular user."""
         if not username:
             raise ValueError(_("Users must submit a username"))
-        if not first_name:
-            raise ValueError(_("Users must submit a first name"))
-        if not last_name:
-            raise ValueError(_("Users must submit a last name"))
         if not email:
             raise ValueError(_("Base User Account: An email address is required"))
 
@@ -26,8 +23,8 @@ class CustomUserManager(BaseUserManager):
 
         user = self.model(
             username=username,
-            first_name=first_name,
-            last_name=last_name,
+            first_name=first_name,  
+            last_name=last_name,    
             email=email,
             **extra_fields
         )
@@ -35,7 +32,7 @@ class CustomUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, username, first_name, last_name, email, password=None, **extra_fields):
+    def create_superuser(self, username, email, password=None, first_name="", last_name="", **extra_fields):
         """Creates and returns a superuser."""
         if not password:
             raise ValueError(_("Superusers must have a password"))
@@ -49,7 +46,8 @@ class CustomUserManager(BaseUserManager):
         if extra_fields["is_superuser"] is not True:
             raise ValueError(_("Superusers must have is_superuser=True"))
 
-        return self.create_user(username, first_name, last_name, email, password, **extra_fields)
+        return self.create_user(username, email, password, first_name, last_name, **extra_fields)
+
 
 
         

@@ -10,16 +10,16 @@ from .managers import CustomUserManager
 class User(AbstractBaseUser, PermissionsMixin):
     pkid = models.BigAutoField(primary_key=True, editable=False)
     id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    username = models.CharField(verbose_name=_("Username"), max_length=255, unique=True,blank=False, null=False)
-    first_name = models.CharField(verbose_name=_("First Name"), max_length=50)
-    last_name = models.CharField(verbose_name=_("Last Name"), max_length=50)
+    username = models.CharField(verbose_name=_("Username"), max_length=255, unique=True)
+    first_name = models.CharField(verbose_name=_("First Name"), max_length=50, blank=True, null=True) 
+    last_name = models.CharField(verbose_name=_("Last Name"), max_length=50, blank=True, null=True)   
     email = models.EmailField(verbose_name=_("Email"), unique=True)
     date_joined = models.DateTimeField(default=timezone.now)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["username","first_name","last_name"]
+    REQUIRED_FIELDS = []
 
     objects = CustomUserManager()
 
