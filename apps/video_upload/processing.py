@@ -7,7 +7,7 @@ import os
 from multiprocessing import cpu_count, Pool
 from functools import partial
 
-# Set up logging
+# Configure logging
 logger = logging.getLogger(__name__)
 
 # Paths for FFmpeg/FFprobe
@@ -16,22 +16,31 @@ FFPROBE_PATH = "ffprobe"
 
 # Determine device (GPU if available, else CPU)
 device = "cuda" if torch.cuda.is_available() else "cpu"
+logger.info(f"Using device: {device}")
 
 # Load Whisper model once (avoid reloading in subprocesses)
+logger.info("Loading Whisper model...")
 model = whisper.load_model("base").to(device)
+logger.info("Whisper model loaded successfully.")
 
 def convert_video_to_text(video_path, chunk_length=30):
     """
     Processes the video in smaller chunks, transcribes it,
     and deletes the video file after processing.
     """
+    logger.info(f"Processing video: {video_path}")
+    
     total_duration = get_video_duration(video_path)
     if total_duration is None:
         logger.error("Failed to get video duration.")
         return "Transcription Failed"
+    
+    logger.info(f"Video duration: {total_duration} seconds")
 
     chunk_starts = list(range(0, total_duration, chunk_length))
     num_processes = min(cpu_count(), len(chunk_starts), 2)  
+
+    logger.info(f"Splitting video into {len(chunk_starts)} chunks using {num_processes} parallel processes.")
 
     try:
         with Pool(processes=num_processes) as pool:
@@ -39,7 +48,13 @@ def convert_video_to_text(video_path, chunk_length=30):
             results = pool.map(process_func, chunk_starts)
 
         transcript = " ".join([r for r in results if isinstance(r, str)]).strip()
-        return transcript if transcript else "Transcription Failed"
+        
+        if transcript:
+            logger.info("Transcription completed successfully.")
+            return transcript
+        else:
+            logger.warning("No text extracted from video.")
+            return "Transcription Failed"
 
     except Exception as e:
         logger.error(f"Error during transcription: {e}")
@@ -49,6 +64,8 @@ def process_chunk(start_time, video_path, chunk_length):
     """
     Extracts a chunk of video and transcribes it.
     """
+    logger.info(f"Processing chunk: {start_time}s to {start_time + chunk_length}s")
+
     command = [
         FFMPEG_PATH, "-i", video_path,
         "-vn", "-sn", "-dn",  
@@ -63,8 +80,9 @@ def process_chunk(start_time, video_path, chunk_length):
     try:
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         audio_data, _ = process.communicate()
+
         if not audio_data:
-            logger.warning(f"No audio extracted from {start_time}s to {start_time+chunk_length}s.")
+            logger.warning(f"No audio extracted from {start_time}s to {start_time + chunk_length}s.")
             return ""
 
         # Convert raw audio bytes to a NumPy array
@@ -72,6 +90,8 @@ def process_chunk(start_time, video_path, chunk_length):
 
         # Transcribe using Whisper model
         result = model.transcribe(audio_np)
+        logger.info(f"Chunk {start_time}s transcribed successfully.")
+
         return result.get("text", "")
 
     except Exception as e:
@@ -82,15 +102,24 @@ def get_video_duration(video_path):
     """
     Retrieves the duration of the video (in seconds) using FFprobe.
     """
+    logger.info(f"Retrieving duration of video: {video_path}")
+    
     command = [
         FFPROBE_PATH, "-i", video_path,
         "-show_entries", "format=duration",
         "-v", "quiet", "-of", "csv=p=0"
     ]
+    
     try:
         result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         duration_str = result.stdout.strip()
-        return int(float(duration_str)) if duration_str else None
+        
+        if duration_str:
+            logger.info(f"Video duration retrieved: {duration_str} seconds")
+            return int(float(duration_str))
+        else:
+            logger.error("Failed to retrieve video duration.")
+            return None
     except Exception as e:
         logger.error(f"Error getting video duration: {e}")
         return None

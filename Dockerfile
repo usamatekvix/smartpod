@@ -1,29 +1,28 @@
-# Use a stable Python version
-FROM python:3.11-slim
+FROM python:3.11
 
-# Set the working directory
-WORKDIR /app
+ENV APP_HOME=/app
+WORKDIR $APP_HOME
 
-# Install system dependencies (including git)
-RUN apt-get update && apt-get install -y git
+LABEL maintainer="osama@tekvix.com"
 
-# Copy the requirements file first to leverage Docker caching
+# Install system dependencies
+RUN apt-get update && apt-get install -y git ffmpeg && rm -rf /var/lib/apt/lists/*
+
+# Copy only requirements file first
 COPY requirements.txt .
 
-# Upgrade pip, setuptools, and wheel
-RUN pip install --upgrade pip setuptools wheel
+# Install dependencies (cache this step)
+RUN pip install --upgrade pip setuptools wheel \
+    && pip install --no-cache-dir -r requirements.txt
 
-# Install numpy separately to avoid issues
-RUN pip install numpy==1.24.3
-
-# Install Whisper from GitHub (fixes versioning issues)
-RUN pip install --no-cache-dir git+https://github.com/openai/whisper.git
-
-# Install remaining dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the rest of the application files
+# Now copy the rest of the application
 COPY . .
+
+# Set entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
 
 # Run the application
 CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]

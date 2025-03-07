@@ -4,3 +4,5 @@ __pycache__/
 media/
 static/
 .env
+venv/
+structure.txt

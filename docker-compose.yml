@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   db:
     image: postgres:15
@@ -9,20 +11,27 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   web:
     build: .
     container_name: smartpod_django
     restart: always
     depends_on:
-      - db
+      db:
+        condition: service_healthy  # Ensures PostgreSQL is ready before Django starts
     env_file:
       - .env
     volumes:
       - .:/smartpod
     ports:
       - "8000:8000"
-
+    entrypoint: ["/entrypoint.sh"]
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
 volumes:
   postgres_data:

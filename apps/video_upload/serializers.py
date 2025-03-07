@@ -3,6 +3,9 @@ from .models import Transcript
 
 class TranscriptSerializer(serializers.ModelSerializer):
     id = serializers.CharField(source="pk")
+    username = serializers.CharField(source='user.username', read_only=True)  
+
     class Meta:
         model = Transcript
-        fields = ['id','categoryName', 'transcription','video_url']
+        fields = ['id', 'username', 'categoryName', 'transcription', 'video_url']  
+
