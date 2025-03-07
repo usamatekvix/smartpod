@@ -9,6 +9,7 @@ from functools import partial
 
 # Configure logging
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 
 # Paths for FFmpeg/FFprobe
 FFMPEG_PATH = "ffmpeg"
@@ -16,12 +17,11 @@ FFPROBE_PATH = "ffprobe"
 
 # Determine device (GPU if available, else CPU)
 device = "cuda" if torch.cuda.is_available() else "cpu"
-logger.info(f"Using device: {device}")
 
 # Load Whisper model once (avoid reloading in subprocesses)
-logger.info("Loading Whisper model...")
+
 model = whisper.load_model("base").to(device)
-logger.info("Whisper model loaded successfully.")
+
 
 def convert_video_to_text(video_path, chunk_length=30):
     """
