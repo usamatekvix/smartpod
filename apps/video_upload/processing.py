@@ -3,13 +3,11 @@ import subprocess
 import numpy as np
 import torch
 import whisper
-import os
 from multiprocessing import cpu_count, Pool
 from functools import partial
 
-# Configure logging
+
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 
 # Paths for FFmpeg/FFprobe
 FFMPEG_PATH = "ffmpeg"
@@ -19,7 +17,6 @@ FFPROBE_PATH = "ffprobe"
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Load Whisper model once (avoid reloading in subprocesses)
-
 model = whisper.load_model("base").to(device)
 
 

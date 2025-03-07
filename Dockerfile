@@ -18,11 +18,6 @@ RUN pip install --upgrade pip setuptools wheel \
 # Now copy the rest of the application
 COPY . .
 
-# Set entrypoint script
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
 
 # Run the application
 CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
