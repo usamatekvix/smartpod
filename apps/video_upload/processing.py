@@ -17,7 +17,11 @@ FFPROBE_PATH = "ffprobe"
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Load Whisper model once (avoid reloading in subprocesses)
-model = whisper.load_model("base").to(device)
+model = whisper.load_model("tiny").to(device)
+
+# Ensure it's using FP32 on CPU
+if device == "cpu":
+    model = model.float()
 
 
 def convert_video_to_text(video_path, chunk_length=30):
@@ -35,7 +39,7 @@ def convert_video_to_text(video_path, chunk_length=30):
     logger.info(f"Video duration: {total_duration} seconds")
 
     chunk_starts = list(range(0, total_duration, chunk_length))
-    num_processes = min(cpu_count(), len(chunk_starts), 2)  
+    num_processes = min(cpu_count(), len(chunk_starts),2)  
 
     logger.info(f"Splitting video into {len(chunk_starts)} chunks using {num_processes} parallel processes.")
 

@@ -12,8 +12,8 @@ SETTINGS_ENV = env
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.3','192.168.1.4','172.21.32.1','localhost','127.0.0.1','*']
-CSRF_TRUSTED_ORIGINS = ['http://192.168.1.4:8000','http://192.168.1.4:3000','http://192.168.1.4:3001','http://localhost:3001', 'http://localhost:3000','http://192.168.1.5:8000','http://192.168.1.3:3000']
+ALLOWED_HOSTS = ['192.168.1.3','192.168.1.4','172.21.32.1','localhost','127.0.0.1','192.168.1.7']
+CSRF_TRUSTED_ORIGINS = ['http://192.168.1.4:8000','http://192.168.1.4:3000','http://192.168.1.4:3001','http://localhost:3001', 'http://localhost:3000','http://192.168.1.5:8000','http://192.168.1.3:3000','http://192.168.1.7:3000']
 
 # Application definition
 DJANGO_APPS=[
@@ -135,6 +135,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     'http://192.168.1.4:3000',  
     'http://192.168.1.3:3000',  
+    'http://192.168.1.7:3000',  
     'http://192.168.1.4:3001',
     'http://localhost:3001',
     'http://192.168.1.5:8000',  

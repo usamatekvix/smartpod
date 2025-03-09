@@ -1,19 +1,23 @@
 import uuid
-from django.contrib.auth.models import AbstractBaseUser,PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+
 from .managers import CustomUserManager
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     pkid = models.BigAutoField(primary_key=True, editable=False)
     id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    username = models.CharField(verbose_name=_("Username"), max_length=255, unique=True)
-    first_name = models.CharField(verbose_name=_("First Name"), max_length=50, blank=True, null=True) 
-    last_name = models.CharField(verbose_name=_("Last Name"), max_length=50, blank=True, null=True)   
+    username = models.CharField(verbose_name=_(
+        "Username"), max_length=255, unique=True)
+    first_name = models.CharField(verbose_name=_(
+        "First Name"), max_length=50, blank=True, null=True)
+    last_name = models.CharField(verbose_name=_(
+        "Last Name"), max_length=50, blank=True, null=True)
     email = models.EmailField(verbose_name=_("Email"), unique=True)
-    phone_number = models.CharField(verbose_name=_("Phone Number"), unique=True, null=True, blank=True) 
     date_joined = models.DateTimeField(default=timezone.now)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -33,13 +37,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}"
-    
+
     def get_short_name(self):
         return self.username
-
-
-
-
-
-
-

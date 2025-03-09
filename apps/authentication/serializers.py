@@ -8,19 +8,19 @@ User = get_user_model()
 class CustomUserCreateSerializer(UserCreateSerializer):
     class Meta(UserCreateSerializer.Meta):
         model = User
-        fields = ("id", "username", "email", "phone_number","password")  
+        fields = ("id", "username", "email","password")  
 
     extra_kwargs = {
         "password": {"write_only": True},  # Hide password from responses
         "email": {"required": True},
         "username": {"required": True},
-        "phone_number": {"required": False},
+        
     }
 
 class CustomUserSerializer(UserSerializer):
     class Meta(UserSerializer.Meta):
         model = User
-        fields = ("id", "username", "email","phone_number", "is_active") 
+        fields = ("id", "username", "email", "is_active") 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
@@ -30,7 +30,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         user = self.user if hasattr(self, 'user') else None
 
         if user:
-            data["username"] = user.username  # Add username to response
+            data["username"] = user.username  
 
         return data
 

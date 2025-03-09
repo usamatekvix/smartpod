@@ -176,4 +176,5 @@ pyrightconfig.json
 media
 .env
 structure.txt
+logs/
 # End of https://www.toptal.com/developers/gitignore/api/python
