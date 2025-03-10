@@ -41,7 +41,7 @@ export default function Create() {
           return;
         }
 
-        const res = await axios.post("http://127.0.0.1:8000/api/upload/", formData, {
+        const res = await axios.post(`${process.env.NEXT_PUBLIC_VIDEOCHAT_API_URL}/api/upload/`, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data", // Important for form data

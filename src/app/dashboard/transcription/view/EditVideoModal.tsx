@@ -50,7 +50,7 @@ const EditVideoModal: React.FC<EditVideoModalProps> = ({
         return;
       }
       const res = await axios.put(
-        `http://127.0.0.1:8000/api/update/${video.id}/`,
+        `${process.env.NEXT_PUBLIC_VIDEOCHAT_API_URL}/api/update/${video.id}/`,
         formData,
         {
           headers: {
