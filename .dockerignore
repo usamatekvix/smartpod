@@ -6,3 +6,4 @@ static/
 .env
 venv/
 structure.txt
+logs/
