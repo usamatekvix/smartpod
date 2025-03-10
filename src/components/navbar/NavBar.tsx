@@ -41,7 +41,7 @@ export default function NavBar() {
     setLoading(true);
     try {
       const res = await axios.post(
-        "http://127.0.0.1:8000/api/auth/jwt/create/",
+        `${process.env.NEXT_PUBLIC_VIDEOCHAT_API_URL}/api/auth/jwt/create/`,
         payload
       );
       console.log(res.data);
@@ -93,7 +93,7 @@ export default function NavBar() {
 
     try {
       const res = await axios.post(
-        "http://127.0.0.1:8000/api/auth/users/",
+        `${process.env.NEXT_PUBLIC_VIDEOCHAT_API_URL}/api/auth/users/`,
         payload
       );
 

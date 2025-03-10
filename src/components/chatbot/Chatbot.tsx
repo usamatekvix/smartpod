@@ -27,7 +27,7 @@ export default function Chatbot() {
           return;
         }
 
-        const res = await axios.get("http://127.0.0.1:8000/api/view/", {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_VIDEOCHAT_API_URL}/api/view/`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
