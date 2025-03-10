@@ -7,3 +7,5 @@ static/
 venv/
 structure.txt
 logs/
+.git
+.gitignore
