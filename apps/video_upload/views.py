@@ -103,3 +103,5 @@ class UserTranscriptListView(ListAPIView):
 
     def get_queryset(self):
         return Transcript.objects.filter(user=self.request.user)
+    
+

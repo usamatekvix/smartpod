@@ -5,4 +5,5 @@ urlpatterns = [
     path("upload/", VideoUploadView.as_view(), name="video-upload"),
     path("update/<int:pk>/", VideoUpdateView.as_view(), name="video-update"),
     path("view/", UserTranscriptListView.as_view(), name="transcription-list"),
+    
 ]

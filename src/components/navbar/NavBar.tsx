@@ -93,7 +93,7 @@ export default function NavBar() {
 
     try {
       const res = await axios.post(
-        "http://127.0.0.1:8000/api/auth/users/",
+        "http://127.0.0.1:80/api/auth/users",
         payload
       );
 
