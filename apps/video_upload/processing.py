@@ -6,6 +6,8 @@ import whisper
 from multiprocessing import cpu_count, Pool
 from functools import partial
 
+from .utils import delete_file
+
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +62,8 @@ def convert_video_to_text(video_path, chunk_length=30):
     except Exception as e:
         logger.error(f"Error during transcription: {e}")
         return "Transcription Failed"
+    finally:
+        delete_file(video_path) 
 
 def process_chunk(start_time, video_path, chunk_length):
     """

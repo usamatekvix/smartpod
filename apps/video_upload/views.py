@@ -18,6 +18,7 @@ class VideoUploadView(APIView):
     permission_classes = [IsAuthenticated]  
 
     def post(self, request):
+        video_path = None
         categoryName = request.data.get("categoryName", "Unknown")
         video_file = request.FILES.get("videoFile")
         video_url = request.data.get("url")
@@ -47,6 +48,7 @@ class VideoUploadView(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 
 
 
@@ -93,8 +95,7 @@ class VideoUpdateView(APIView):
             logger.error(f"Error updating video: {e}")
             return Response({"error": "An error occurred while updating the video"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        finally:
-            delete_file(video_path)
+        
 
 class UserTranscriptListView(ListAPIView):
     serializer_class = TranscriptSerializer

@@ -10,10 +10,14 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - smartpod_network
 
-  web:
-    build: .
-    container_name: smartpod
+  backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: smartpod-backend
     restart: always
     depends_on:
       - db
@@ -26,6 +30,40 @@ services:
     command: >
       sh -c "python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
+    networks:
+      - smartpod_network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: smartpod-frontend
+    volumes:
+      - .:/app
+      - /app/node_modules
+    env_file:
+      - .env.local
+    ports:
+      - "3000:3000"
+    networks:
+      - smartpod_network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    depends_on:
+      - frontend
+      - backend
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+    networks:
+      - smartpod_network
 
 volumes:
   postgres_data:
+networks:
+  smartpod_network:
+    driver: bridge
